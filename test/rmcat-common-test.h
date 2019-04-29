@@ -64,7 +64,8 @@ public:
     RmcatTestCase (uint64_t capacity,   // bottleneck capacity  (in bps)
                    uint32_t delay,      // one-way propagation delay (in ms)
                    uint32_t qdelay,     // bottleneck queue depth (in ms)
-                   std::string desc);   // test case name/description
+                   std::string desc,   // test case name/description
+                   std::string ccontroller);
 
     virtual void DoSetup ();
     virtual void DoTeardown ();
@@ -81,6 +82,8 @@ protected:
     uint64_t m_capacity;   // bottleneck capacity (in bps)
     uint32_t m_delay;      // one-way propagation delay (in ms)
     uint32_t m_qdelay;     // bottleneck queue depth (in ms)
+
+    std::string m_ccontroller;
 };
 
 #endif /* RMCAT_COMMON_TEST_H */

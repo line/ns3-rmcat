@@ -23,14 +23,19 @@ def build(bld):
         'model/apps/rmcat-sender.cc',
         'model/apps/rmcat-receiver.cc',
         'model/apps/rtp-header.cc',
+        'model/apps/rmcat-ccfs-receiver.cc',
+        'model/apps/rfb-header.cc',
+        'model/apps/rmcat-utils.cc',
         'model/syncodecs/syncodecs.cc',
         'model/syncodecs/traces-reader.cc',
         'model/congestion-control/sender-based-controller.cc',
         'model/congestion-control/dummy-controller.cc',
         'model/congestion-control/nada-controller.cc',
+        'model/congestion-control/ccfs-controller.cc',
         'model/topo/topo.cc',
         'model/topo/wired-topo.cc',
         'model/topo/wifi-topo.cc',
+        'model/congestion-control/rate_statistics.cc',
         ]
 
     module.defines = ['NS3_ASSERT_ENABLE', 'NS3_LOG_ENABLE']
@@ -53,15 +58,20 @@ def build(bld):
         'model/apps/rmcat-constants.h',
         'model/apps/rmcat-sender.h',
         'model/apps/rmcat-receiver.h',
+        'model/apps/rmcat-ccfs-receiver.h',
         'model/apps/rtp-header.h',
+        'model/apps/rfb-header.h',
+        'model/apps/rmcat-utils.h',
         'model/syncodecs/syncodecs.h',
         'model/syncodecs/traces-reader.h',
         'model/congestion-control/sender-based-controller.h',
         'model/congestion-control/dummy-controller.h',
         'model/congestion-control/nada-controller.h',
+        'model/congestion-control/ccfs-controller.h',
         'model/topo/topo.h',
         'model/topo/wired-topo.h',
         'model/topo/wifi-topo.h',
+        'model/congestion-control/rate_statistics.h',
        ]
 
     if bld.env.ENABLE_EXAMPLES:

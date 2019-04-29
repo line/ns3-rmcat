@@ -56,8 +56,9 @@ static void SenderPauseResume (Ptr<RmcatSender> send, bool pause)
 RmcatWiredTestCase::RmcatWiredTestCase (uint64_t capacity, // bottleneck capacity (in bps)
                                         uint32_t delay,    // one-way propagation delay (in ms)
                                         uint32_t qdelay,   // bottleneck queue depth (in ms)
-                                        std::string desc)  // test case name/description
-: RmcatTestCase{capacity, delay, qdelay, desc},
+                                        std::string desc,  // test case name/description
+                                        std::string ccontroller)
+: RmcatTestCase{capacity, delay, qdelay, desc, ccontroller},
   m_numFlowsFw{1},  // default: a single forward RMCAT flow
   m_numFlowsBw{0},
   m_numTcpFlows{0},
@@ -66,7 +67,7 @@ RmcatWiredTestCase::RmcatWiredTestCase (uint64_t capacity, // bottleneck capacit
   m_simTime{RMCAT_TC_SIMTIME},
   m_pauseFid{0},
   m_codecType{SYNCODEC_TYPE_FIXFPS}
-{}
+{ }
 
 
 /*
@@ -332,7 +333,8 @@ void RmcatWiredTestCase::SetUpRMCAT (std::vector<Ptr<RmcatSender> >& send,
         std::stringstream ss;
         ss << ss0.str () << i;
 
-        ApplicationContainer rmcatApps = m_topo.InstallRMCAT (ss.str (),          // Flow ID
+        ApplicationContainer rmcatApps = m_topo.InstallRMCAT (m_ccontroller,
+                                                              ss.str (),          // Flow ID
                                                               basePort + (i * 2), // port number
                                                               pDelayMs,           // path RTT
                                                               fwd);               // direction indicator

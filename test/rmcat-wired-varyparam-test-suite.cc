@@ -46,11 +46,11 @@
 class RmcatVaryParamTestSuite : public TestSuite
 {
 public:
-  RmcatVaryParamTestSuite ();
+  RmcatVaryParamTestSuite (const std::string &testname, const std::string &ccontroller);
 };
 
-RmcatVaryParamTestSuite::RmcatVaryParamTestSuite ()
-  : TestSuite{"rmcat-vparam", UNIT}
+RmcatVaryParamTestSuite::RmcatVaryParamTestSuite (const std::string &testname, const std::string &ccontroller)
+  : TestSuite{testname, UNIT}
 {
     // ----------------
     // Default test case parameters
@@ -106,7 +106,7 @@ RmcatVaryParamTestSuite::RmcatVaryParamTestSuite ()
 
             std::stringstream ss;
             ss << "rmcat-test-case-5.6-C" << bw_i / (1u << 10) << "-pdel" << pdel_j;
-            RmcatWiredTestCase * tc56tmp = new RmcatWiredTestCase{bw_i, pdel_j, qdel, ss.str ()};
+            RmcatWiredTestCase * tc56tmp = new RmcatWiredTestCase{bw_i, pdel_j, qdel, ss.str (), ccontroller};
             tc56tmp->SetSimTime (simT);                // Simulation time: 300s
             tc56tmp->SetTCPLongFlows (1, tstartTC56, tstopTC56, true);    // Forward path
 
@@ -115,4 +115,21 @@ RmcatVaryParamTestSuite::RmcatVaryParamTestSuite ()
     }
 }
 
-static RmcatVaryParamTestSuite rmcatVparamTestSuite;
+
+#define DEFINE_RMCAT_VPARAM_TEST_SUITE(_TESTNAME_, _CONTROLLER_)     \
+\
+class RmcatVaryParamTestSuite##_CONTROLLER_: public RmcatVaryParamTestSuite   \
+{                                                                   \
+public:                                                             \
+RmcatVaryParamTestSuite##_CONTROLLER_()                                  \
+        : RmcatVaryParamTestSuite(_TESTNAME_, #_CONTROLLER_)             \
+{ }                                                                 \
+};                                                                  \
+\
+static RmcatVaryParamTestSuite##_CONTROLLER_ rmcatVaryParamTestSuite##_CONTROLLER_
+
+
+DEFINE_RMCAT_VPARAM_TEST_SUITE("rmcat-vparam-nada", NADA);
+
+DEFINE_RMCAT_VPARAM_TEST_SUITE("rmcat-vparam-ccfs", CCFS);
+

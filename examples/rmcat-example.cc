@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-
+/**/
 /**
  * @file
  * Simple example demonstrating the usage of the rmcat ns3 module, using:
@@ -28,10 +28,13 @@
  * @author Xiaoqing Zhu
  */
 
+#include "ns3/ccfs-controller.h"
 #include "ns3/nada-controller.h"
 #include "ns3/rmcat-sender.h"
+#include "ns3/rmcat-ccfs-receiver.h"
 #include "ns3/rmcat-receiver.h"
 #include "ns3/rmcat-constants.h"
+#include "ns3/rmcat-utils.h"
 #include "ns3/point-to-point-helper.h"
 #include "ns3/data-rate.h"
 #include "ns3/bulk-send-helper.h"
@@ -42,15 +45,27 @@
 #include "ns3/ipv4-address-helper.h"
 #include "ns3/core-module.h"
 
+#include "ns3/drop-tail-queue.h"
+
 const uint32_t RMCAT_DEFAULT_RMIN  =  150000;  // in bps: 150Kbps
 const uint32_t RMCAT_DEFAULT_RMAX  = 1500000;  // in bps: 1.5Mbps
 const uint32_t RMCAT_DEFAULT_RINIT =  150000;  // in bps: 150Kbps
 
 const uint32_t TOPO_DEFAULT_BW     = 1000000;    // in bps: 1Mbps
+
 const uint32_t TOPO_DEFAULT_PDELAY =      50;    // in ms:   50ms
 const uint32_t TOPO_DEFAULT_QDELAY =     300;    // in ms:  300ms
 
 using namespace ns3;
+
+/**********************************************
+ * by JNGWOCK
+ **********************************************/
+#define RMCAT_SIM_ENDTIME         120.             // was 300.
+#define RMCAT_SIM_START_APP       2.             // was 10.
+#define RMCAT_SIM_START_TCP       10.             // was 17.
+#define RMCAT_SIM_START_UDP       10.             // was 23.
+
 
 static NodeContainer BuildExampleTopo (uint64_t bps,
                                        uint32_t msDelay,
@@ -149,7 +164,7 @@ static void InstallUDP (Ptr<Node> sender,
     serverApps.Stop (Seconds (stopTime));
 }
 
-static void InstallApps (bool nada,
+static void InstallApps (std::string algo,
                          Ptr<Node> sender,
                          Ptr<Node> receiver,
                          uint16_t port,
@@ -157,19 +172,55 @@ static void InstallApps (bool nada,
                          float minBw,
                          float maxBw,
                          float startTime,
-                         float stopTime)
+                         float stopTime,
+                         uint32_t topoBw)
 {
     Ptr<RmcatSender> sendApp = CreateObject<RmcatSender> ();
-    Ptr<RmcatReceiver> recvApp = CreateObject<RmcatReceiver> ();
+    Ptr<RmcatReceiver> recvApp = NULL;
+
+    if(algo == "ccfs") {
+      recvApp = CreateObject<RmcatCcfsReceiver> ();
+      sendApp->SetControllerName(algo);
+    }
+    else {
+      recvApp = CreateObject<RmcatReceiver> ();
+    }
+
     sender->AddApplication (sendApp);
     receiver->AddApplication (recvApp);
 
-    if (nada) {
+    if (algo == "nada") {
         sendApp->SetController (std::make_shared<rmcat::NadaController> ());
     }
+    else if(algo == "ccfs") {
+        std::shared_ptr<rmcat::CcfsController> ccfs = std::make_shared<rmcat::CcfsController> ();
+        sendApp->SetController (ccfs);
+
+        ccfs->setNetworkAttributes( topoBw );
+
+        PointerValue ptrValue;
+        sender->GetDevice(0)->GetAttribute("TxQueue", ptrValue);
+
+        Ptr<ns3::UtilNQMonitor> nqmtr = CreateObject<UtilNQMonitor> (
+                                            ns3::Ptr<ns3::Queue>( ptrValue.Get<ns3::DropTailQueue> ()),
+                                            topoBw);
+
+
+        ccfs->setNQMonitor(nqmtr);
+        ns3::DynamicCast<RmcatCcfsReceiver>(recvApp)->SetNQMonitor(nqmtr);
+
+
+
+    }
+
+
     Ptr<Ipv4> ipv4 = receiver->GetObject<Ipv4> ();
     Ipv4Address receiverIp = ipv4->GetAddress (1, 0).GetLocal ();
     sendApp->Setup (receiverIp, port); // initBw, minBw, maxBw);
+
+    sendApp->SetRinit(initBw);
+    sendApp->SetRmin(minBw);
+    sendApp->SetRmax(maxBw);
 
     const auto fps = 25.;
     auto innerCodec = new syncodecs::StatisticsCodec{fps};
@@ -191,21 +242,24 @@ int main (int argc, char *argv[])
     int nTcp = 0;
     int nUdp = 0;
     bool log = false;
-    bool nada = true;
     std::string strArg  = "strArg default";
+    uint32_t topoBwKbps = (TOPO_DEFAULT_BW / 1000);
+    std::string algo = "ccfs";
+
 
     CommandLine cmd;
-    cmd.AddValue ("rmcat", "Number of RMCAT (NADA) flows", nRmcat);
+    cmd.AddValue ("rmcat", "Number of RMCAT (NADA/CCFS) flows", nRmcat);
     cmd.AddValue ("tcp", "Number of TCP flows", nTcp);
     cmd.AddValue ("udp", "Number of UDP flows", nUdp);
     cmd.AddValue ("log", "Turn on logs", log);
-    cmd.AddValue ("nada", "true: use NADA, false: use dummy", nada);
+    cmd.AddValue ("algo", "Algorithm", algo);
+    cmd.AddValue ("kbps", "Throughput", topoBwKbps);
     cmd.Parse (argc, argv);
 
     if (log) {
-        LogComponentEnable ("RmcatSender", LOG_INFO);
-        LogComponentEnable ("RmcatReceiver", LOG_INFO);
-        LogComponentEnable ("Packet", LOG_FUNCTION);
+        /// LogComponentEnable ("RmcatSender", LOG_INFO);
+        /// LogComponentEnable ("RmcatReceiver", LOG_INFO);
+        /// LogComponentEnable ("Packet", LOG_FUNCTION);
     }
 
     // configure default TCP parameters
@@ -213,7 +267,7 @@ int main (int argc, char *argv[])
     Config::SetDefault ("ns3::TcpL4Protocol::SocketType", StringValue ("ns3::TcpNewReno"));
     Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1000));
 
-    const uint64_t linkBw   = TOPO_DEFAULT_BW;
+    const uint64_t linkBw   = topoBwKbps * 1000;
     const uint32_t msDelay  = TOPO_DEFAULT_PDELAY;
     const uint32_t msQDelay = TOPO_DEFAULT_QDELAY;
 
@@ -221,20 +275,21 @@ int main (int argc, char *argv[])
     const float maxBw =  RMCAT_DEFAULT_RMAX;
     const float initBw = RMCAT_DEFAULT_RINIT;
 
-    const float endTime = 300.;
+    const float endTime = RMCAT_SIM_ENDTIME;
 
     NodeContainer nodes = BuildExampleTopo (linkBw, msDelay, msQDelay);
 
+
     int port = 8000;
     for (size_t i = 0; i < nRmcat; i++) {
-        auto start = 10. * i;
+        auto start = RMCAT_SIM_START_APP * i;
         auto end = std::max (start + 1., endTime - start);
-        InstallApps (nada, nodes.Get (0), nodes.Get (1), port++,
-                     initBw, minBw, maxBw, start, end);
+        InstallApps (algo, nodes.Get (0), nodes.Get (1), port++,
+                     initBw, minBw, maxBw, start, end, linkBw);
     }
 
     for (size_t i = 0; i < nTcp; i++) {
-        auto start = 17. * i;
+        auto start = RMCAT_SIM_START_TCP * i;
         auto end = std::max (start + 1., endTime - start);
         InstallTCP (nodes.Get (0), nodes.Get (1), port++, start, end);
     }
@@ -244,13 +299,17 @@ int main (int argc, char *argv[])
     const uint32_t pktSize = DEFAULT_PACKET_SIZE;
 
     for (size_t i = 0; i < nUdp; i++) {
-        auto start = 23. * i;
+        auto start = RMCAT_SIM_START_UDP * i;
         auto end = std::max (start + 1., endTime - start);
         InstallUDP (nodes.Get (0), nodes.Get (1), port++,
                     bandwidth, pktSize, start, end);
     }
 
-    std::cout << "Running Simulation..." << std::endl;
+    std::string commandLineStr= "";
+    for (int i=1; i < argc; i++) 
+      commandLineStr.append(std::string(argv[i]).append(" "));
+
+    std::cout << "Running Simulation with command line: " << commandLineStr << std::endl;
     Simulator::Stop (Seconds (endTime));
     Simulator::Run ();
     Simulator::Destroy ();

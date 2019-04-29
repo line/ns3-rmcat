@@ -124,7 +124,9 @@ void SenderBasedController::updateInterLossData(uint16_t sequence) {
         ++m_ilState.expectedSeq;
         return;
     }
-    assert(sequence > m_ilState.expectedSeq);
+    /// consider wrap-around (jngwock)
+    assert(sequence > m_ilState.expectedSeq || (sequence < 50 && m_ilState.expectedSeq > (65535-50)));
+
     m_ilState.intervals.push_front(1); // Start new interval; shift the existing ones
     if (m_ilState.intervals.size() > 9) {
         m_ilState.intervals.pop_back();

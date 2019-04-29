@@ -149,7 +149,8 @@ public:
      *
      * @retval A container with the two applications (sender and receiver)
      */
-    ApplicationContainer InstallRMCAT (const std::string& flowId,
+    ApplicationContainer InstallRMCAT (const std::string& ccontroller,
+                                       const std::string& flowId,
                                        uint32_t nodeId,
                                        uint16_t serverPort,
                                        bool downstream);

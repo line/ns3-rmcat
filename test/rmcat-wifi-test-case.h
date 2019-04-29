@@ -73,7 +73,8 @@ public:
     RmcatWifiTestCase (uint64_t capacity,  // wired link capacity (in bps)
                        uint32_t pdelay,    // propagation delay (in ms)
                        uint32_t qdelay,    // wired bottleneck queue depth (in ms)
-                       std::string desc);  // test case description/name
+                       std::string desc,
+                       std::string ccontroller);  // test case description/name
 
     virtual void DoSetup ();
     virtual void DoRun ();
@@ -160,6 +161,7 @@ private:
 
     SyncodecType m_codecType; // traffic source type
     ns3::WifiMode m_phyMode;  // PHY mode for wireless connections
+
 };
 
 #endif /* RMCAT_WIFI_TEST_CASE_H */

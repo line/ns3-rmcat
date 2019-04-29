@@ -147,6 +147,7 @@ public:
         RTCP_RTPFB_TLLEI  =  7,
         RTCP_RTPFB_ECN_FB =  8,
         RTCP_RTPFB_PR     =  9,
+        RTCP_RTPFB_RFB    = 14,  // TODO 
         RTCP_RTPFB_CC     = 15,  // TODO (deferred): Change to IANA-assigned value
     };
 

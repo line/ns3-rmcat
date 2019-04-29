@@ -28,19 +28,23 @@
 #include "rmcat-common-test.h"
 #include "ns3/log.h"
 
+NS_LOG_COMPONENT_DEFINE ("RmcatTestCase");
+
 using namespace ns3;
 
 /* Base class of RMCAT test cases: constructor */
 RmcatTestCase::RmcatTestCase (uint64_t capacity,
                               uint32_t delay,
                               uint32_t qdelay,
-                              std::string desc)
+                              std::string desc,
+                              std::string ccontroller)
 : TestCase{desc}
 , m_debug{false}
 , m_sb{NULL}
 , m_capacity{capacity}   // bottleneck capacity
 , m_delay{delay}         // one-way propagation delay
 , m_qdelay{qdelay}       // bottleneck queue depth
+, m_ccontroller(ccontroller)
 {
 
     // name of log file same as test case descriptions
@@ -70,6 +74,12 @@ void RmcatTestCase::DoSetup ()
     // for logging
     m_ofs.open (m_logfile.c_str (), std::ios_base::out);
     m_sb = std::clog.rdbuf (m_ofs.rdbuf ());
+
+    NS_LOG_INFO("TestCase Setup: "
+                "\n capacity=" << m_capacity <<
+                "\n delay=" << m_delay <<
+                "\n qdelay=" << m_qdelay <<
+                "\n controller=" << m_ccontroller);
 }
 
 void RmcatTestCase::DoTeardown ()

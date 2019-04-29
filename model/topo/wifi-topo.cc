@@ -222,7 +222,8 @@ ApplicationContainer WifiTopo::InstallCBR (uint32_t nodeId,
 }
 
 
-ApplicationContainer WifiTopo::InstallRMCAT (const std::string& flowId,
+ApplicationContainer WifiTopo::InstallRMCAT (const std::string& ccontroller,
+                                             const std::string& flowId,
                                              uint32_t nodeId,
                                              uint16_t serverPort,
                                              bool downstream)
@@ -235,7 +236,8 @@ ApplicationContainer WifiTopo::InstallRMCAT (const std::string& flowId,
         std::swap (sender, receiver);
     }
 
-    return Topo::InstallRMCAT (flowId,
+    return Topo::InstallRMCAT (ccontroller,
+                               flowId,
                                sender,
                                receiver,
                                serverPort);

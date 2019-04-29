@@ -46,17 +46,21 @@ RmcatReceiver::RmcatReceiver ()
 , m_header{}
 , m_sendEvent{}
 , m_periodUs{RMCAT_FEEDBACK_PERIOD_US}
-{}
+{
+  NS_LOG_FUNCTION(this);
+}
 
 RmcatReceiver::~RmcatReceiver () {}
 
 void RmcatReceiver::Setup (uint16_t port)
 {
+    NS_LOG_FUNCTION(this);
     m_socket = Socket::CreateSocket (GetNode (), UdpSocketFactory::GetTypeId ());
     auto local = InetSocketAddress{Ipv4Address::GetAny (), port};
     auto ret = m_socket->Bind (local);
     NS_ASSERT (ret == 0);
     m_socket->SetRecvCallback (MakeCallback (&RmcatReceiver::RecvPacket, this));
+    NS_LOG_INFO(local<<" "<<port);
 
     m_running = false;
     m_waiting = true;
@@ -64,6 +68,7 @@ void RmcatReceiver::Setup (uint16_t port)
 
 void RmcatReceiver::StartApplication ()
 {
+    NS_LOG_FUNCTION(this);
     m_running = true;
     m_ssrc = rand ();
     m_header.SetSendSsrc (m_ssrc);
@@ -81,6 +86,7 @@ void RmcatReceiver::StopApplication ()
 
 void RmcatReceiver::RecvPacket (Ptr<Socket> socket)
 {
+    NS_LOG_FUNCTION(this);
     if (!m_running) {
         return;
     }

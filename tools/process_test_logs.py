@@ -33,16 +33,16 @@ def process_row(row, width):
             line = (SEP + 'NaN') * width
         return line
 
-def process_controller_log(line, test_logs):
+def process_controller_log(line, algoname, test_logs):
     'place-holder, parsing debug stats'
     match = re.search(r'controller_log: DEBUG:', line)
     if match:
         #Controller's debug log, ignore
         return
 
-    'parsing nada-specific stats'
+    'parsing algorithm specific stats'
     # ts: 158114 loglen: 60 qdel: 286 rtt: 386 ploss: 0 plr: 0.00 xcurr: 4.72 rrate: 863655.56 srate: 916165.81 avgint: 437.10 curint: 997 delta: 100
-    match = re.search(r'algo:nada (\S+) ts: (\d+) loglen: (\d+)', line)
+    match = re.search(r'algo:' + algoname + ' (\S+) ts: (\d+) loglen: (\d+)', line)
     match_d = re.search(r'qdel: (\d+(?:\.\d*)?|\.\d+) rtt: (\d+(?:\.\d*)?|\.\d+)', line)
     match_p = re.search(r'ploss: (\d+) plr: (\d+(?:\.\d*)?|\.\d+)', line)
     match_x = re.search(r'xcurr: (\d+(?:\.\d*)?|\.\d+)', line)
@@ -67,9 +67,9 @@ def process_controller_log(line, test_logs):
         curint = int(match_l.group(2))
         delta = float(match_D.group(1))
 
-        if obj not in test_logs['nada']:
-            test_logs['nada'][obj] = []
-        test_logs['nada'][obj].append([ts, qdel, rtt, ploss, plr, x_curr,
+        if obj not in test_logs[algoname]:
+            test_logs[algoname][obj] = []
+        test_logs[algoname][obj].append([ts, qdel, rtt, ploss, plr, x_curr,
                                        rrate, srate, loglen, avgint, curint, delta])
         return
 
@@ -88,7 +88,7 @@ def process_tcp_log(line, test_logs):
         return
     assert False, "Error: Unrecognized tcp log line: <{}>".format(line)
 
-def process_log(dirname, filename, all_logs):
+def process_log(algoname, dirname, filename, all_logs):
     abs_fn = os.path.join(dirname, filename)
     if not os.path.isfile(abs_fn):
         print "Skipping file {} (not a regular file)".format(filename)
@@ -101,14 +101,14 @@ def process_log(dirname, filename, all_logs):
     print "Processing file {}...".format(filename)
     test_name = match.group(1).replace(".", "_").replace("-", "_")
 
-    test_logs = {'nada': {}, 'tcp': {} }
+    test_logs = {algoname: {}, 'tcp': {} }
     all_logs[test_name] = test_logs
 
     with open(abs_fn) as f_log:
         for line in f_log:
             match = re.search(r'controller_log:', line)
             if match:
-                process_controller_log(line, test_logs)
+                process_controller_log(line, algoname, test_logs)
                 continue
             match = re.search(r'tcp_log:', line)
             if match:
@@ -116,32 +116,33 @@ def process_log(dirname, filename, all_logs):
                 continue
             #Unrecognized ns3 log line , ignore
 
-    saveto_matfile(dirname, filename, test_logs)
+    saveto_matfile(algoname, dirname, filename, test_logs)
 
-def saveto_matfile(dirname, test_name, test_logs):
+def saveto_matfile(algoname, dirname, test_name, test_logs):
     'save to *.mat file'
     f_out_name = os.path.join(dirname, '{}.mat'.format(test_name))
     print 'Creating matlab file: {}'.format(f_out_name)
     f_out = open(f_out_name, 'w')
     f_out.write('%  id | ts | qdel | rtt | ploss | plr | xcurr ')
     f_out.write('| rrate | srate | loglen | avgint | curint\n')
-    for (i, obj) in enumerate(test_logs['nada'].keys()):
-        nrec = len(test_logs['nada'][obj])
+    for (i, obj) in enumerate(test_logs[algoname].keys()):
+        nrec = len(test_logs[algoname][obj])
         print 'parsing flow ', obj, ' number of records: ', nrec
         for j in range(nrec):
-            row = process_row(test_logs['nada'][obj][j], width=12)
+            row = process_row(test_logs[algoname][obj][j], width=12)
             f_out.write(SEP.join([str(i), row]))
             f_out.write('\n')
 
 # -------------------- #
-if len(sys.argv) != 2:
-    print >> sys.stderr, 'Usage: python {} <log_directory>'.format(sys.argv[0])
+if len(sys.argv) != 3:
+    print >> sys.stderr, 'Usage: python {} <algorithm name> <log_directory>'.format(sys.argv[0])
     sys.exit(1)
-dirname = sys.argv[1]
+algoname = sys.argv[1]
+dirname = sys.argv[2]
 assert os.path.isdir(dirname)
 all_logs = {}
 for filename in os.listdir(dirname):
-    process_log(dirname, filename, all_logs)
+    process_log(algoname, dirname, filename, all_logs)
 
 print "Creating json file with all data: all_tests.json"
 f_json_name = os.path.join(dirname, 'all_tests.json')

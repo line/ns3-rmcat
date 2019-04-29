@@ -42,16 +42,16 @@ public:
 
     void Setup (uint16_t port);
 
-private:
+protected:
     virtual void StartApplication ();
     virtual void StopApplication ();
 
-    void RecvPacket (Ptr<Socket> socket);
+    virtual void RecvPacket (Ptr<Socket> socket);
     void AddFeedback (uint16_t sequence,
                       uint64_t recvTimestampUs);
     void SendFeedback (bool reschedule);
 
-private:
+protected:
     bool m_running;
     bool m_waiting;
     uint32_t m_ssrc;

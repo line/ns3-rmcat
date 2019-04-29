@@ -117,7 +117,8 @@ ApplicationContainer WiredTopo::InstallCBR (uint16_t serverPort,
                              packetSize);
 }
 
-ApplicationContainer WiredTopo::InstallRMCAT (const std::string& flowId,
+ApplicationContainer WiredTopo::InstallRMCAT (const std::string& ccontroller,
+                                              const std::string& flowId,
                                               uint16_t serverPort,
                                               uint32_t pDelayMs,
                                               bool forward)
@@ -130,7 +131,8 @@ ApplicationContainer WiredTopo::InstallRMCAT (const std::string& flowId,
         std::swap (sender, receiver);
     }
 
-    return Topo::InstallRMCAT (flowId,
+    return Topo::InstallRMCAT (ccontroller,
+                               flowId,
                                sender,
                                receiver,
                                serverPort);

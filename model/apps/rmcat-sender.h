@@ -57,6 +57,8 @@ public:
 
     void Setup (Ipv4Address dest_ip, uint16_t dest_port);
 
+    void SetControllerName(std::string algorithm);
+
 private:
     virtual void StartApplication ();
     virtual void StopApplication ();
@@ -89,6 +91,7 @@ private:
     std::deque<uint32_t> m_rateShapingBuf;
     uint32_t m_rateShapingBytes;
     uint64_t m_nextSendTstmpUs;
+    std::string m_algo;
 };
 
 }

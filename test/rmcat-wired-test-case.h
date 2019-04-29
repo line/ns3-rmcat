@@ -58,7 +58,8 @@ public:
     RmcatWiredTestCase (uint64_t capacity,  // bottleneck capacity (in bps)
                         uint32_t delay,     // one-way propagation delay (in ms)
                         uint32_t qdelay,    // bottleneck queue depth (in ms)
-                        std::string desc);  // test case description/name
+                        std::string desc,  // test case description/name
+                        std::string ccontroller);
 
     virtual void DoSetup ();
     virtual void DoRun ();
@@ -161,6 +162,7 @@ private:
     std::vector<uint32_t> m_resumeTimes;
 
     SyncodecType m_codecType;
+
 };
 
 #endif /* RMCAT_WIRED_TEST_CASE_H */

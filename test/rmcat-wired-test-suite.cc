@@ -41,14 +41,14 @@
  * Defines collection of test cases as specified in
  * the rmcat-eval-test draft
  */
-class RmcatTestSuite : public TestSuite
+class RmcatWiredTestSuite : public TestSuite
 {
 public:
-  RmcatTestSuite ();
+  RmcatWiredTestSuite (const std::string &testname, const std::string &&ccontroller);
 };
 
-RmcatTestSuite::RmcatTestSuite ()
-  : TestSuite{"rmcat-wired", UNIT}
+RmcatWiredTestSuite::RmcatWiredTestSuite  (const std::string &testname, const std::string &&ccontroller)
+  : TestSuite{testname, UNIT}
 {
     // ----------------
     // Default test case parameters
@@ -82,35 +82,35 @@ RmcatTestSuite::RmcatTestSuite ()
     timeTC51.push_back (60);  bwTC51.push_back ( .6 * (1u << 20)); // 0.6 Mbps
     timeTC51.push_back (80);  bwTC51.push_back        (1u << 20);  // 1 Mbps
 
-    RmcatWiredTestCase * tc51a = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-fixfps"};
+    RmcatWiredTestCase * tc51a = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-fixfps", ccontroller};
     tc51a->SetSimTime (100); // simulation time: 100s
     tc51a->SetBW (timeTC51, bwTC51, true); // FWD path
 
-    RmcatWiredTestCase * tc51b = new RmcatWiredTestCase{bw, 100, qdel, "rmcat-test-case-5.1-fixfps-pdel_100ms"};
+    RmcatWiredTestCase * tc51b = new RmcatWiredTestCase{bw, 100, qdel, "rmcat-test-case-5.1-fixfps-pdel_100ms", ccontroller};
     tc51b->SetSimTime (100); // simulation time: 100s
     tc51b->SetBW (timeTC51, bwTC51, true); // FWD path
 
-    RmcatWiredTestCase * tc51c = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-cbrlike"};
+    RmcatWiredTestCase * tc51c = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-cbrlike", ccontroller};
     tc51c->SetSimTime (100); // simulation time: 100s
     tc51c->SetBW (timeTC51, bwTC51, true); // FWD path
     tc51c->SetCodec (SYNCODEC_TYPE_PERFECT); // CBR-like traffic source
 
-    RmcatWiredTestCase * tc51d = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-stats"};
+    RmcatWiredTestCase * tc51d = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-stats", ccontroller};
     tc51d->SetSimTime (100); // simulation time: 100s
     tc51d->SetBW (timeTC51, bwTC51, true); // FWD path
     tc51d->SetCodec (SYNCODEC_TYPE_STATS); // statistical video source
 
-    RmcatWiredTestCase * tc51e = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-trace"};
+    RmcatWiredTestCase * tc51e = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-trace", ccontroller};
     tc51e->SetSimTime (100); // simulation time: 100s
     tc51e->SetBW (timeTC51, bwTC51, true); // FWD path
     tc51e->SetCodec (SYNCODEC_TYPE_TRACE); // trace-based video source
 
-    RmcatWiredTestCase * tc51f = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-sharing"};
+    RmcatWiredTestCase * tc51f = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-sharing", ccontroller};
     tc51f->SetSimTime (100); // simulation time: 100s
     tc51f->SetBW (timeTC51, bwTC51, true); // FWD path
     tc51f->SetCodec (SYNCODEC_TYPE_SHARING); // content-sharing video source
 
-    RmcatWiredTestCase * tc51g = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-hybrid"};
+    RmcatWiredTestCase * tc51g = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.1-hybrid", ccontroller};
     tc51g->SetSimTime (100); // simulation time: 100s
     tc51g->SetBW (timeTC51, bwTC51, true); // FWD path
     tc51g->SetCodec (SYNCODEC_TYPE_HYBRID); // hybrid (trace/statistics) video source
@@ -126,7 +126,7 @@ RmcatTestSuite::RmcatTestSuite ()
     timeTC52.push_back (75);  bwTC52.push_back ( .5  * (1u << 21)); // 0.5 * 2 Mbps
     timeTC52.push_back (100); bwTC52.push_back         (1u << 21);  // 2 Mbps
 
-    RmcatWiredTestCase * tc52 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.2-fixfps"};
+    RmcatWiredTestCase * tc52 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.2-fixfps", ccontroller};
     tc52->SetSimTime (125); // simulation time: 125s
     tc52->SetBW (timeTC52, bwTC52, true);
     tc52->SetRMCATFlows (2, t0s, t0s, true);
@@ -147,7 +147,7 @@ RmcatTestSuite::RmcatTestSuite ()
     timeTC53bwd.push_back (35); bwTC53bwd.push_back ( .8 * (1u << 20)); // 0.8 Mbps
     timeTC53bwd.push_back (70); bwTC53bwd.push_back (2.  * (1u << 20)); // 2 Mbps
 
-    RmcatWiredTestCase * tc53 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.3-fixfps"};
+    RmcatWiredTestCase * tc53 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.3-fixfps", ccontroller};
     tc53->SetSimTime (100); // simulation time: 100s
     tc53->SetBW (timeTC53fwd, bwTC53fwd, true);  // Forward path
     tc53->SetBW (timeTC53bwd, bwTC53bwd, false); // Backward path
@@ -162,7 +162,7 @@ RmcatTestSuite::RmcatTestSuite ()
     tstartTC54.push_back (0);  tstopTC54.push_back (119);
     tstartTC54.push_back (20);  tstopTC54.push_back (119);
     tstartTC54.push_back (40);  tstopTC54.push_back (119);
-    RmcatWiredTestCase * tc54 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.4-fixfps"};
+    RmcatWiredTestCase * tc54 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.4-fixfps", ccontroller};
     tc54->SetCapacity (3.5 * (1u << 20));  // bottleneck capacity: 3.5 Mbps
     tc54->SetSimTime (simT); // default simulation time: 120s
     tc54->SetRMCATFlows (3, tstartTC54, tstopTC54, true);    // Forward path
@@ -186,7 +186,7 @@ RmcatTestSuite::RmcatTestSuite ()
     tstartTC55.push_back (20);  tstopTC55.push_back (299);
     tstartTC55.push_back (30);  tstopTC55.push_back (299);
     tstartTC55.push_back (40);  tstopTC55.push_back (299);
-    RmcatWiredTestCase * tc55 = new RmcatWiredTestCase{bw, 10, qdel, "rmcat-test-case-5.5-fixfps"};
+    RmcatWiredTestCase * tc55 = new RmcatWiredTestCase{bw, 10, qdel, "rmcat-test-case-5.5-fixfps", ccontroller};
     tc55->SetCapacity (3.5 * (1u << 20));  // bottleneck capacity: 3.5 Mbps
     tc55->SetSimTime (300); // simulation time: 300s
     tc55->SetRMCATFlows (5, tstartTC55, tstopTC55, true);  // Forward path
@@ -200,7 +200,7 @@ RmcatTestSuite::RmcatTestSuite ()
     std::vector<uint32_t> tstopTC56; // Seconds
     tstartTC56.push_back (5); tstopTC56.push_back (119);
 
-    RmcatWiredTestCase * tc56 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.6-fixfps"};
+    RmcatWiredTestCase * tc56 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.6-fixfps", ccontroller};
     tc56->SetCapacity (2 * (1u << 20));     // Bottleneck capacity: 2Mbps
     tc56->SetSimTime (simT);                // Default simulation time: 120s
     tc56->SetRMCATFlows (1, tstartTC56, tstopTC56, true); // Forward path
@@ -215,7 +215,7 @@ RmcatTestSuite::RmcatTestSuite ()
     tstartTC57.push_back (5); tstopTC57.push_back (299);
     tstartTC57.push_back (5); tstopTC57.push_back (299);
 
-    RmcatWiredTestCase * tc57 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.7-fixfps"};
+    RmcatWiredTestCase * tc57 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.7-fixfps", ccontroller};
     tc57->SetCapacity (2 * (1u << 20)); // Bottleneck capacity: 2Mbps
     tc57->SetSimTime (300);                  // Simulation time: 300s
     tc57->SetRMCATFlows (2, tstartTC57, tstopTC57, true); // Forward path
@@ -232,7 +232,7 @@ RmcatTestSuite::RmcatTestSuite ()
     tpauseTC58.push_back (40);
     tresumeTC58.push_back (60);
 
-    RmcatWiredTestCase * tc58 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.8-fixfps"};
+    RmcatWiredTestCase * tc58 = new RmcatWiredTestCase{bw, pdel, qdel, "rmcat-test-case-5.8-fixfps", ccontroller};
     tc58->SetCapacity (3.5 * (1u << 20));  // bottleneck capacity: 3.5 Mbps (same as TC5.4)
     tc58->SetSimTime (simT); // default simulation time: 120s (same as TC5.4)
     tc58->SetRMCATFlows (3, t0s, t0s, true);  // Forward path
@@ -260,4 +260,21 @@ RmcatTestSuite::RmcatTestSuite ()
     AddTestCase (tc58, TestCase::QUICK);
 }
 
-static RmcatTestSuite rmcatTestSuite;
+
+#define DEFINE_RMCAT_WIRED_TEST_SUITE(_TESTNAME_, _CONTROLLER_)     \
+\
+class RmcatWiredTestSuite##_CONTROLLER_: public RmcatWiredTestSuite  \
+{                                                                   \
+public:                                                             \
+RmcatWiredTestSuite##_CONTROLLER_()                                  \
+        : RmcatWiredTestSuite(_TESTNAME_, #_CONTROLLER_)             \
+{ }                                                                 \
+};                                                                  \
+\
+static RmcatWiredTestSuite##_CONTROLLER_ rmcatWiredTestSuite##_CONTROLLER_
+
+
+DEFINE_RMCAT_WIRED_TEST_SUITE("rmcat-wired-nada", NADA);
+
+DEFINE_RMCAT_WIRED_TEST_SUITE("rmcat-wired-ccfs", CCFS);
+

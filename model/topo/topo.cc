@@ -29,6 +29,8 @@
 #include "ns3/rmcat-sender.h"
 #include "ns3/rmcat-receiver.h"
 #include "ns3/nada-controller.h"
+#include "ns3/ccfs-controller.h"
+#include "ns3/rmcat-ccfs-receiver.h"
 #include <memory>
 #include <limits>
 #include <sys/stat.h>
@@ -172,10 +174,51 @@ ApplicationContainer Topo::InstallCBR (Ptr<Node> sender,
     return apps;
 }
 
-ApplicationContainer Topo::InstallRMCAT (const std::string& flowId,
-                                         Ptr<Node> sender,
-                                         Ptr<Node> receiver,
-                                         uint16_t serverPort)
+ApplicationContainer Topo::InstallRMCAT_CCFS(const std::string& flowId,
+                                             Ptr<Node> sender,
+                                             Ptr<Node> receiver,
+                                             uint16_t serverPort)
+{
+
+    NS_LOG_INFO ("[TOBEDEL] Begin Topo::InstallRMCAT_CCFS()");
+
+    auto rmcatAppSend = CreateObject<RmcatSender> ();
+    auto rmcatAppRecv = CreateObject<RmcatCcfsReceiver> ();
+    auto ccfs = std::make_shared<rmcat::CcfsController> ();
+
+    sender->AddApplication (rmcatAppSend);
+    receiver->AddApplication (rmcatAppRecv);
+
+    rmcatAppSend->SetController(ccfs);
+    rmcatAppSend->SetControllerName("CCFS");
+
+    Ipv4Address serverIP = GetIpv4AddressOfNode (receiver, 1, 0);
+    rmcatAppSend->Setup (serverIP, serverPort);
+
+    ccfs->setLogCallback( logFromController );
+    ccfs->setId( flowId );
+
+    rmcatAppSend->SetStartTime (Seconds (0));
+    rmcatAppSend->SetStopTime (Seconds (T_MAX_S));
+
+    rmcatAppRecv->Setup (serverPort);
+    rmcatAppRecv->SetStartTime (Seconds (0));
+    rmcatAppRecv->SetStopTime (Seconds (T_MAX_S));
+
+
+    ApplicationContainer apps;
+    apps.Add (rmcatAppSend);
+    apps.Add (rmcatAppRecv);
+
+    NS_LOG_INFO ("[TOBEDEL] End Topo::InstallRMCAT_CCFS()");
+
+    return apps;
+}
+
+ApplicationContainer Topo::InstallRMCAT_NADA (const std::string& flowId,
+                                              Ptr<Node> sender,
+                                              Ptr<Node> receiver,
+                                              uint16_t serverPort)
 {
 
     auto rmcatAppSend = CreateObject<RmcatSender> ();
@@ -203,6 +246,22 @@ ApplicationContainer Topo::InstallRMCAT (const std::string& flowId,
     apps.Add (rmcatAppSend);
     apps.Add (rmcatAppRecv);
     return apps;
+}
+
+ApplicationContainer Topo::InstallRMCAT (const std::string& ccontroller,
+                                         const std::string& flowId,
+                                         Ptr<Node> sender,
+                                         Ptr<Node> receiver,
+                                         uint16_t serverPort)
+{
+    if(ccontroller == "ccfs" ||
+       ccontroller == "CCFS")
+    {
+        return InstallRMCAT_CCFS(flowId, sender, receiver, serverPort);
+    }
+
+    return InstallRMCAT_NADA(flowId, sender, receiver, serverPort);
+
 }
 
 void Topo::logFromController (const std::string& msg) {

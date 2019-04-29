@@ -103,6 +103,8 @@ protected:
      * The sender of application data (resp. receiver) will be installed at the
      * sender (resp. receiver) node.
      *
+     * @param [in]     ccontroller The specific algorithm to congestion control
+     *
      * @param [in]     flowId A string denoting the flow's id. Useful for
      *                        logging and plotting
      * @param [in,out] sender ns3 node that is to contain the #RmcatSender
@@ -115,7 +117,8 @@ protected:
      * @retval A container with the two applications (sender and receiver)
      */
 
-    static ApplicationContainer InstallRMCAT (const std::string& flowId,
+    static ApplicationContainer InstallRMCAT (const std::string& ccontroller,
+                                              const std::string& flowId,
                                               Ptr<Node> sender,
                                               Ptr<Node> receiver,
                                               uint16_t serverPort);
@@ -127,6 +130,16 @@ protected:
      * @param [in] msg Message that the congestion controller wants to log
      */
     static void logFromController (const std::string& msg);
+
+private:
+    static ApplicationContainer InstallRMCAT_NADA(const std::string& flowId,
+                                                   Ptr<Node> sender,
+                                                   Ptr<Node> receiver,
+                                                   uint16_t serverPort);
+    static ApplicationContainer InstallRMCAT_CCFS(const std::string& flowId,
+                                                  Ptr<Node> sender,
+                                                  Ptr<Node> receiver,
+                                                  uint16_t serverPort);
 };
 
 }

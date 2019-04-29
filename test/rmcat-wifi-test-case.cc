@@ -57,8 +57,9 @@ NS_LOG_COMPONENT_DEFINE ("RmcatSimTestWifi");
 RmcatWifiTestCase::RmcatWifiTestCase (uint64_t capacity, // wired link capacity (in bps)
                                       uint32_t pdelay,   // wired link forward propagation delay (in ms)
                                       uint32_t qdelay,   // wired link queue depth (in ms)
-                                      std::string desc)  // test case name/description
-: RmcatTestCase{capacity, pdelay, qdelay, desc}
+                                      std::string desc,  // test case name/description
+                                      std::string ccontroller)
+: RmcatTestCase{capacity, pdelay, qdelay, desc, ccontroller}
 , m_nWifi{2}  // default: a pair of bi-directional RMCAT flows
 , m_nDnRMCAT{1}
 , m_nUpRMCAT{1}
@@ -165,7 +166,8 @@ void RmcatWifiTestCase::SetUpRMCAT (std::vector<Ptr<RmcatSender> >& send,
         std::stringstream ss;
         ss << ss0.str () << i;
 
-        ApplicationContainer rmcatApps = m_topo.InstallRMCAT (ss.str (),        // flowID
+        ApplicationContainer rmcatApps = m_topo.InstallRMCAT (m_ccontroller,
+                                                              ss.str (),        // flowID
                                                               nRmcatBase + i,   // nodeID
                                                               basePort + i * 2, // port # ,
                                                               fwd);             // direction

@@ -27,8 +27,10 @@
 
 #include "rmcat-sender.h"
 #include "rtp-header.h"
+#include "rfb-header.h"
 #include "ns3/dummy-controller.h"
 #include "ns3/nada-controller.h"
+#include "ns3/ccfs-controller.h"
 #include "ns3/udp-socket-factory.h"
 #include "ns3/packet.h"
 #include "ns3/simulator.h"
@@ -59,6 +61,7 @@ RmcatSender::RmcatSender ()
 , m_rSend{0.}
 , m_rateShapingBytes{0}
 , m_nextSendTstmpUs{0}
+, m_algo{""}
 {}
 
 RmcatSender::~RmcatSender () {}
@@ -185,6 +188,8 @@ void RmcatSender::Setup (Ipv4Address destIP,
 
     m_destIP = destIP;
     m_destPort = destPort;
+
+    NS_LOG_INFO(m_destIP<<" "<<m_destPort);
 }
 
 void RmcatSender::SetRinit (float r)
@@ -258,9 +263,17 @@ void RmcatSender::EnqueuePacket ()
     Time tNext{Seconds (secsToNextEnqPacket)};
     m_enqueueEvent = Simulator::Schedule (tNext, &RmcatSender::EnqueuePacket, this);
 
+    if(m_algo == "ccfs" || m_algo == "CCFS")
+    {
+        if(bytesToSend == 1)
+            return;
+        SendOverSleep(m_rateShapingBytes);
+        return;
+    }
+    
     if (!USE_BUFFER) {
         m_sendEvent = Simulator::ScheduleNow (&RmcatSender::SendPacket, this,
-                                              secsToNextEnqPacket * 1000. * 1000.);
+                                          secsToNextEnqPacket * 1000.);
         return;
     }
 
@@ -321,7 +334,18 @@ void RmcatSender::SendPacket (uint64_t usSlept)
 void RmcatSender::SendOverSleep (uint32_t bytesToSend) {
     const auto nowUs = Simulator::Now ().GetMicroSeconds ();
 
-    m_controller->processSendPacket (nowUs, m_sequence, bytesToSend);
+    if(m_algo == "ccfs" || m_algo == "CCFS")
+    {
+        auto *vcc = dynamic_cast<rmcat::CcfsController *>(m_controller.get());
+        vcc->processSendPacket2 (m_ssrc, nowUs,  m_sequence, m_rateShapingBytes);
+        bytesToSend = m_rateShapingBytes;
+        m_rateShapingBuf.clear ();
+        m_rateShapingBytes = 0;
+    }
+    else
+    {
+        m_controller->processSendPacket (nowUs, m_sequence, bytesToSend);
+    }
 
     ns3::RtpHeader header{96}; // 96: dynamic payload type, according to RFC 3551
     header.SetSequence (m_sequence++);
@@ -351,6 +375,21 @@ void RmcatSender::RecvPacket (Ptr<Socket> socket)
 
     // get the feedback header
     const uint64_t nowUs = Simulator::Now ().GetMicroSeconds ();
+    
+    if(m_algo == "ccfs" || m_algo == "CCFS")
+    {
+        RfbHeader header {};
+        Packet->RemoveHeader (header);
+
+        auto *vcc = dynamic_cast<rmcat::CcfsController *>(m_controller.get());
+        vcc->processFeedback2(nowUs, header);
+
+        m_rVin = m_rSend = vcc->getBandwidth(nowUs);
+        NS_LOG_INFO("m_rVin=m_rSend=" << m_rVin);
+
+        return;
+    }
+
     CCFeedbackHeader header{};
     NS_LOG_INFO ("RmcatSender::RecvPacket, " << Packet->ToString ());
     Packet->RemoveHeader (header);
@@ -362,7 +401,7 @@ void RmcatSender::RecvPacket (Ptr<Socket> socket)
         return;
     }
     std::vector<std::pair<uint16_t,
-                          CCFeedbackHeader::MetricBlock> > feedback{};
+                      CCFeedbackHeader::MetricBlock> > feedback{};
     const bool res = header.GetMetricList (m_ssrc, feedback);
     NS_ASSERT (res);
     std::vector<rmcat::SenderBasedController::FeedbackItem> fbBatch{};
@@ -376,6 +415,7 @@ void RmcatSender::RecvPacket (Ptr<Socket> socket)
     }
     m_controller->processFeedbackBatch (nowUs, fbBatch);
     CalcBufferParams (nowUs);
+
 }
 
 void RmcatSender::CalcBufferParams (uint64_t nowUs)
@@ -408,5 +448,9 @@ void RmcatSender::CalcBufferParams (uint64_t nowUs)
         m_rSend = r_ref;
     }
 }
-
+void RmcatSender::SetControllerName(std::string algo)
+{
+    m_algo = algo;
+    NS_LOG_INFO("Set Controller Name: " << m_algo);
+}
 }

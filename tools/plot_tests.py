@@ -65,8 +65,8 @@ def adjust_tmax(tmax, new_max_ts):
     tmax_tmp = int(new_max_ts + 2.5) / 5 * 5
     return tmax_tmp if tmax_tmp > tmax else tmax
 
-def plot_test_case(tc_name, contents, dirname):
-    rmcat_log = contents['nada']
+def plot_test_case(algoname, tc_name, contents, dirname):
+    rmcat_log = contents[algoname]
     tcp_log = contents['tcp']
     rmcat_keys = sorted(rmcat_log.keys())
     tcp_keys = sorted(tcp_log.keys())
@@ -151,10 +151,11 @@ def plot_test_case(tc_name, contents, dirname):
 
 
 # ---------  #
-if len(sys.argv) != 2:
-    print >> sys.stderr, 'Usage: python {} <log_directory>'.format(sys.argv[0])
+if len(sys.argv) != 3:
+    print >> sys.stderr, 'Usage: python {} <algorithm name> <log_directory>'.format(sys.argv[0])
     sys.exit(1)
-dirname = sys.argv[1]
+algoname = sys.argv[1]
+dirname = sys.argv[2]
 assert os.path.isdir(dirname)
 
 f_json_name = os.path.join(dirname, 'all_tests.json')
@@ -162,4 +163,4 @@ assert os.path.isfile(f_json_name)
 f_json = open(f_json_name, 'r')
 all_logs = json.load(f_json)
 for test_case in all_logs.keys():
-    plot_test_case(test_case, all_logs[test_case], dirname)
+    plot_test_case(algoname, test_case, all_logs[test_case], dirname)
