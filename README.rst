@@ -128,7 +128,7 @@ Use test.chs
 You can also use `test.csh <tools/test.csh>`_ to run test suites and plot scripts in one go. 
 When you run `test.csh`, the log files with testcase names will be created in the "testpy-output/[CURRENT UTC TIME]" directory unless otherwise specified.
 
-``./src/ns3-rmcat/tools/test.csh $(algorithm-name) $(access-network-name)``
+``./src/ns3-rmcat/tools/test.csh $(algorithm-name) $(test-scenario-name-without-rmcat)``
 
 ::
 
@@ -139,7 +139,7 @@ When you run `test.csh`, the log files with testcase names will be created in th
 
 You can run `test.csh` with a specific output directory.
 
-``./src/ns3-rmcat/tools/test.csh $(algorithm-name) $(access-network-name) $(specific-directory-name)``
+``./src/ns3-rmcat/tools/test.csh $(algorithm-name) $(access-network-name-without-rmcat) $(specific-directory-name)``
 
 ::
 
