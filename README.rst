@@ -110,34 +110,41 @@ Build NS3 with ns3-rmcat
 
 Run test suites
 ===================
-Run test suites by running the ``./test.py`` script. When a test suite is completed, some log files are generated, which will be used to generate plots.
+1. Run test suites by running the ``./test.py`` script. When a test suite is completed, some log files are generated, which will be used to generate plots.
 
 ``./test.py -s rmcat-wired-ccfs -w rmcat.html -r``, where ``rmcat.html`` is the test report.
 
-Generate plots
-=================
-After running test suites, plots can be created. System requires the installation of the python module `matplotlib <https://matplotlib.org/>`_.
+2. Create a new directory and move all temporary files created by test suites into the new directory.
 
-``python src/ns3-rmcat/tools/process_test_logs.py testpy-output/2017-08-11-18-52-15-CUT``
+3. Create plots. System requires the installation of the python module `matplotlib <https://matplotlib.org/>`_.
 
-``python src/ns3-rmcat/tools/plot_tests.py testpy-output/2017-08-11-18-52-15-CUT``
+``python src/ns3-rmcat/tools/process_test_logs.py $(algorithm-name) $(specific-directory-name)``
+
+``python src/ns3-rmcat/tools/plot_tests.py $(algorithm-name) $(specific-directory-name)``
 
 
 Use test.chs
 =============
-You can also use `test.csh <tools/test.csh>`_ to run test suites and plot scripts in one go. When you run `test.csh`, the log files with testcase names will be created in the "testpy-output/[CURRENT UTC TIME]" directory unless otherwise specified.
+You can also use `test.csh <tools/test.csh>`_ to run test suites and plot scripts in one go. 
+When you run `test.csh`, the log files with testcase names will be created in the "testpy-output/[CURRENT UTC TIME]" directory unless otherwise specified.
+
+``./src/ns3-rmcat/tools/test.csh $(algorithm-name) $(access-network-name)``
 
 ::
+    # Example: png files will be located in the "testpy-output/[CURRENT UTC TIME]"
+    # ./src/ns3-rmcat/tools/test.csh ccfs wired
+    # ./src/ns3-rmcat/tools/test.csh nada vparam 
+    # ./src/ns3-rmcat/tools/test.csh some wifi 
 
-    # run from ns3 root directory: ns-3.xx/
-    #
-    # Example:
-    # ./src/ns3-rmcat/tools/test.csh ccfs wired 2017-07-21-rmcat-wired
-    # ./src/ns3-rmcat/tools/test.csh nada vparam 2017-07-21-rmcat-wired-vparam
-    # ./src/ns3-rmcat/tools/test.csh some wifi 2017-07-21-rmcat-wifi
-    #
-    # The second parameter, output directory, is optional. If not specified,
-    # the script will use a folder with a name based on current GMT time
+You can run `test.csh` with a specific output directory.
+
+``./src/ns3-rmcat/tools/test.csh $(algorithm-name) $(access-network-name) $(specific-directory-name)``
+
+::
+    # Example: png files will be located in a specific directory
+    # ./src/ns3-rmcat/tools/test.csh ccfs wired testout-rmcat-wired
+    # ./src/ns3-rmcat/tools/test.csh nada vparam testout-rmcat-wired-vparam
+    # ./src/ns3-rmcat/tools/test.csh some wifi testout-rmcat-wifi
 
 
 Run rmcat-example
