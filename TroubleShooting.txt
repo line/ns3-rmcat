@@ -1,0 +1,17 @@
+NS3-3.26
+
+macOS 10.14.6 
+
+1. Turn-off errors stopping build
+..(1) -Wno-potentially-evaluated-expression
+..(2) -Wno-unused-local-typedefs
+..(3) (Add if need)
+
+set_cxxflags exports adding related options.
+run 'source set_cxxflags'
+
+2. Cannot find libxml2 include (even -I/usr/include/libxml2).
+Maybe, there is no directory /usr/include/libxml2 but installed in the other space. 
+(/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/libxml2)
+Add code to disable loading libxml2 if don;t need.
+..(1) "have_libxml2 = False" in 'src/config-store/wscript' file right after writing have_libxml2(28 line)
