@@ -72,6 +72,8 @@ RmcatWiredTestSuite::RmcatWiredTestSuite  (const std::string &testname, const st
     // Config::SetDefault ("ns3::TcpSocket::RcvBufSize", UintegerValue (RMCAT_TC_TCP_RECVBUF_SIZE));
     // Config::SetDefault ("ns3::TcpSocket::SndBufSize", UintegerValue (RMCAT_TC_TCP_RECVBUF_SIZE));
 
+    // TODO (deferred): Set up a mechanism (e.g., json-based) to load TC setup. Goal: improve readability
+
     // -----------------------
     // Test Case 5.1: Variable Available Capacity with a Single Flow
     // -----------------------
