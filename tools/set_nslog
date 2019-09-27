@@ -1,0 +1,4 @@
+#!/bin/sh
+# export 'NS_LOG=Queue=level_all|prefix_func|prefix_time:RmcatCcfsReceiver=level_all|prefix_func|prefix_time:RfbHeader=level_all|prefix_func|prefix_time:CcfsController=level_all|prefix_func|prefix_time'
+export 'NS_LOG=RmcatCcfsReceiver=level_all|prefix_func|prefix_time:RfbHeader=level_all|prefix_func|prefix_time:CcfsController=level_all|prefix_func|prefix_time:RmcatSender=level_all|prefix_func|prefix_time:UtilNQMonitor=level_all|prefix_func|prefix_time'
+echo $NS_LOG

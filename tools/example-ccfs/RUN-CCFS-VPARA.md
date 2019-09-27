@@ -13,6 +13,11 @@ Using rmcat-example, draw a graph of qdelay and sending bitrate under the limite
 * Test scenario: pure CCFS, CCFS + 1TCP, CCFS + 1UDP
 * The UDP cross traffic send rate = 375 kbps
 
+Before running rmcat-example for ccfs, check ns log level is proper or not.
+Simply you can use tools/set_nslog file.
+
+`source set_nslog`
+
 run-ccfs-vpara.py
 -------------
 Current Directory: src/ns3-rmcat/tools/example-ccfs

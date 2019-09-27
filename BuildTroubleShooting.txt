@@ -14,7 +14,7 @@ Trouble shooting
 ..(3) (Add if need)
 
 [Option]
-You can use set_cxxflags exports adding related options.
+You can use tools/set_cxxflags exports adding related options.
 run 'source set_cxxflags'
 
 

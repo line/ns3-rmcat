@@ -1,0 +1,3 @@
+#!/bin/sh
+export 'CXXFLAGS=-std=c++11 -Wall -Werror -Wno-potentially-evaluated-expression -Wno-unused-local-typedefs -Wno-deprecated-declarations -Wno-unused-private-field -Wno-constant-logical-operand -Wno-self-assign-overloaded'
+echo $CXXFLAGS
